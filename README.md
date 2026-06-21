@@ -9,7 +9,7 @@ nix flake check -v -L --no-build --no-write-lock-file --all-systems --refresh gi
 
 ## Dev Sell
 ```bash
-nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#uboot-armv6l
+nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main
 ```
 
 ---
