@@ -5,6 +5,7 @@
 
   outputs = { self, nixpkgs }: {
     packages.x86_64-linux = let
+      pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
       pkgsFor = crossSystem: import nixpkgs {
         inherit crossSystem;
         system = "x86_64-linux";
