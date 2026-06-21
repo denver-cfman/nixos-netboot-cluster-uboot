@@ -4,16 +4,13 @@
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs = { self, nixpkgs }: {
-    packages.x86_64-linux = let
-      pkgsFor = crossSystem: import nixpkgs {
-        inherit crossSystem;
-        system = "x86_64-linux";
-        config.allowUnsupportedSystem = true;
-      };
+  packages.x86_64-linux = let
+      pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
     in {
-      uboot-armv6   = (pkgsFor { config = "armv6l-unknown-linux-gnueabihf"; }).buildPackages.ubootRaspberryPi;
-      uboot-armv7   = (pkgsFor { config = "armv7l-unknown-linux-gnueabihf"; }).buildPackages.ubootRaspberryPi;
-      uboot-aarch64 = (pkgsFor { config = "aarch64-unknown-linux-gnu"; }).buildPackages.ubootRaspberryPi;
+      # Accessing the pre-configured cross-compiled packages directly
+      uboot-armv6   = pkgs.pkgsCross.armv6l-hf.ubootRaspberryPi;
+      uboot-armv7   = pkgs.pkgsCross.armv7l-hf.ubootRaspberryPi;
+      uboot-aarch64 = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi;
     };
 
     devShells.x86_64-linux.default = let
