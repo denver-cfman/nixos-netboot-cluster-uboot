@@ -17,7 +17,8 @@
       uboot-armv7   = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
   
       # For older ARMv6 (Pi 1/Zero), use this target:
-      uboot-armv6   = pkgs.pkgsCross.armv6l-hf-multiplatform.ubootRaspberryPi;
+      uboot-armv6   = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
+      #uboot-armv6   = pkgs.pkgsCross.armv6l-hf-multiplatform.ubootRaspberryPi;
     };
 
     devShells.x86_64-linux.default = let
