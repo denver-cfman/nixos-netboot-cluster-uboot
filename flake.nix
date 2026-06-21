@@ -12,8 +12,10 @@
       };
     in {
       uboot-armv6   = (pkgsFor { config = "armv6l-unknown-linux-gnueabihf"; }).buildPackages.ubootRaspberryPi;
-      uboot-armv7   = (pkgsFor { config = "armv7l-unknown-linux-gnueabihf"; }).buildPackages.ubootRaspberryPi;
-      uboot-aarch64 = (pkgsFor { config = "aarch64-unknown-linux-gnu"; }).buildPackages.ubootRaspberryPi;
+      # Use specific 64-bit targets for aarch64
+      uboot-aarch64 = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
+      # For 32-bit targets, use the appropriate RPi 32-bit defconfigs
+      uboot-armv7 = pkgs.pkgsCross.armv7l-hf.ubootRaspberryPi3_32bit;
     };
 
     devShells.x86_64-linux.default = let
