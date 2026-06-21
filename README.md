@@ -19,6 +19,7 @@ nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=ma
 nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#uboot-armv6l
 ```
 ### once done, the writeable image will be in .result/u-boot.bin
+
 ``` sudo dd if=result/u-boot.bin of=/dev/sdX bs=4M conv=fsync status=progress ```
 ---
 
@@ -27,6 +28,7 @@ nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=ma
 nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#uboot-armv7l
 ```
 ### once done, the writeable image will be in .result/u-boot.bin
+
 ``` sudo dd if=result/u-boot.bin of=/dev/sdX bs=4M conv=fsync status=progress ```
 ---
 
@@ -35,5 +37,6 @@ nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=ma
 nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#uboot-aarch64
 ```
 ### once done, the writeable image will be in .result/u-boot.bin
+
 ``` sudo dd if=result/u-boot.bin of=/dev/sdX bs=4M conv=fsync status=progress ```
 ---
