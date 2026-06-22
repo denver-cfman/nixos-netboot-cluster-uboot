@@ -12,25 +12,27 @@
         nativeBuildInputs = [ pkgs.mtools pkgs.ubootTools pkgs.libfaketime ];
         # Pass the bootCmd file as an environment variable to the builder
         BOOT_CMD = bootCmd; 
-        buildCommand = ''
+         buildCommand = ''
           mkdir -p $out
           truncate -s 120M $out/sd-image.img
           ${pkgs.mtools}/bin/mformat -i $out/sd-image.img -F -v "BOOT" ::
           
           mkdir -p stage
-          # Compile the script provided in the BOOT_CMD variable
-          ${pkgs.ubootTools}/bin/mkimage -A arm -O linux -T script -C none -n "Boot Script" -d $BOOT_CMD stage/boot.scr
+          # Explicitly copy to a writable location and compile
+          cp $BOOT_CMD stage/boot.cmd
+          ${pkgs.ubootTools}/bin/mkimage -A arm -O linux -T script -C none -n "Boot Script" -d stage/boot.cmd stage/boot.scr
           
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin stage/
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start.elf stage/
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup.dat stage/
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/*.dtb stage/
+          # Copy Firmware
+          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/{bootcode.bin,start.elf,fixup.dat,*.dtb} stage/
           cp -r ${pkgs.raspberrypifw}/share/raspberrypi/boot/overlays stage/
           cp ${uboot}/u-boot.bin stage/kernel.img
           echo "${configTxt}" > stage/config.txt
           
+          # Use mcopy with explicit error checking
+          # Adding 'set -x' here will show you exactly which file fails in the logs
+          set -x 
           for file in stage/*; do
-            ${pkgs.mtools}/bin/mcopy -i $out/sd-image.img $file ::
+            ${pkgs.mtools}/bin/mcopy -i $out/sd-image.img "$file" ::
           done
         '';
       };
