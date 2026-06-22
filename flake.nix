@@ -10,26 +10,18 @@
       mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
         name = "rpi-sd-image-${uboot.name}";
         nativeBuildInputs = [ pkgs.mtools pkgs.ubootTools pkgs.libfaketime ];
-        # Pass the bootCmd file as an environment variable to the builder
         BOOT_CMD = bootCmd; 
          buildCommand = ''
           mkdir -p $out
           truncate -s 120M $out/sd-image.img
           ${pkgs.mtools}/bin/mformat -i $out/sd-image.img -F -v "BOOT" ::
-          
           mkdir -p stage
-          # Explicitly copy to a writable location and compile
           cp $BOOT_CMD stage/boot.cmd
           ${pkgs.ubootTools}/bin/mkimage -A arm -O linux -T script -C none -n "Boot Script" -d stage/boot.cmd stage/boot.scr
-          
-          # Copy Firmware
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/{bootcode.bin,start.elf,fixup.dat,*.dtb} stage/
           cp -r ${pkgs.raspberrypifw}/share/raspberrypi/boot/overlays stage/
           cp ${uboot}/u-boot.bin stage/kernel.img
           echo "${configTxt}" > stage/config.txt
-          
-          # Use mcopy with explicit error checking
-          # Adding 'set -x' here will show you exactly which file fails in the logs
           set -x 
           for file in stage/*; do
             ${pkgs.mtools}/bin/mcopy -i $out/sd-image.img "$file" ::
