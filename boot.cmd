@@ -1,14 +1,19 @@
 # boot.cmd
-# 1. Initialize the network interface
+# 1. Initialize USB bus
+usb start
+
+# 2. Force probing of all USB devices
+usb reset
+
+# 3. List devices to verify the network interface is bound
+# If this doesn't show an 'eth' device, the driver is missing
+dm tree
+
+# 4. Attempt to initialize the network interface
+# Some boards require this to bind the driver to the USB device
+setenv autoload no
 dhcp
 
-# 2. Set the server IP (optional, DHCP usually provides this)
-# setenv serverip 192.168.1.10
-
-# 3. Load the kernel/boot files via TFTP
-# Using the standard PXE boot command is often more reliable
+# 5. Proceed with PXE
 pxe get
 pxe boot
-
-# Fallback: if PXE fails, reset
-reset
