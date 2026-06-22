@@ -30,9 +30,9 @@
       };
     in {
       # Raw U-Boot binaries
-      uboot-aarch64 = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
-      uboot-armv7   = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
-      uboot-armv6   = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
+      #uboot-aarch64 = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
+      #uboot-armv7   = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
+      #uboot-armv6   = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
 
       # SD Images
       image-aarch64 = mkSDImage { 
