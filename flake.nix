@@ -11,20 +11,16 @@
       mkSDImage = { uboot, configTxt }: pkgs.stdenv.mkDerivation {
         name = "rpi-sd-image-${uboot.name}";
         buildInputs = [ pkgs.mtools ];
-         buildCommand = ''
+        buildCommand = ''
           mkdir -p $out/boot
-          # Use the correct package name: raspberrypifw
-          cp ${pkgs.raspberrypifw}/bootcode.bin $out/boot/
-          cp ${pkgs.raspberrypifw}/start.elf $out/boot/
-          cp ${pkgs.raspberrypifw}/fixup.dat $out/boot/
+          # Often these files are nested in 'share/raspberrypi/boot'
+          # Try updating the source path:
+          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin $out/boot/
+          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start.elf $out/boot/
+          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup.dat $out/boot/
           
-          # Copy our cross-compiled U-Boot
           cp ${uboot}/u-boot.bin $out/boot/
-          
-          # Write configuration
           echo "${configTxt}" > $out/boot/config.txt
-          
-          # Create a reproducible tarball
           ${pkgs.gnutar}/bin/tar -C $out/boot -cf $out/sd-image.tar .
         '';
       };
