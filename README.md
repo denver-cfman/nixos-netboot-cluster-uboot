@@ -16,7 +16,7 @@ nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=ma
 
 ## Build u-boot image for armv6l (A, A+, B, B+, Zero, Zero-W)
 ```bash
-nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#uboot-armv6l
+nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#image-armv6
 ```
 ### once done, the writeable image will be in .result/u-boot.bin
 
@@ -25,7 +25,7 @@ nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=ma
 
 ## Build u-boot image for armv7l
 ```bash
-nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#uboot-armv7l
+nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#image-armv7
 ```
 ### once done, the writeable image will be in .result/u-boot.bin
 
@@ -34,7 +34,7 @@ nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=ma
 
 ## Build u-boot image for aarch64 (3, ,4 ,5, Zero2-W)
 ```bash
-nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#uboot-aarch64
+nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#image-aarch64
 ```
 ### once done, the writeable image will be in .result/u-boot.bin
 
