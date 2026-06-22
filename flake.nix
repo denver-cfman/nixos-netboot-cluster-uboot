@@ -7,7 +7,7 @@
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
       
-mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
+      mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
         name = "rpi-sd-image-${uboot.name}";
         nativeBuildInputs = [ pkgs.mtools pkgs.ubootTools pkgs.libfaketime ];
         # Pass the bootCmd file as an environment variable to the builder
