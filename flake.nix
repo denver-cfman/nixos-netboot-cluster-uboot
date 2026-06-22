@@ -7,22 +7,20 @@
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
       
-      mkSDImage = { uboot, configTxt }: pkgs.stdenv.mkDerivation {
+mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
         name = "rpi-sd-image-${uboot.name}";
-        nativeBuildInputs = [ pkgs.mtools pkgs.libfaketime ];
-         buildCommand = ''
-          # 1. Create the output directory first!
+        nativeBuildInputs = [ pkgs.mtools pkgs.ubootTools pkgs.libfaketime ];
+        # Pass the bootCmd file as an environment variable to the builder
+        BOOT_CMD = bootCmd; 
+        buildCommand = ''
           mkdir -p $out
-          
-          # 2. Now you can write to the file inside $out
           truncate -s 120M $out/sd-image.img
-          
-          # 3. Format as FAT32
           ${pkgs.mtools}/bin/mformat -i $out/sd-image.img -F -v "BOOT" ::
           
-          # 4. Stage files
           mkdir -p stage
-          ${pkgs.ubootTools}/bin/mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd stage/boot.scr
+          # Compile the script provided in the BOOT_CMD variable
+          ${pkgs.ubootTools}/bin/mkimage -A arm -O linux -T script -C none -n "Boot Script" -d $BOOT_CMD stage/boot.scr
+          
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin stage/
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start.elf stage/
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup.dat stage/
@@ -31,7 +29,6 @@
           cp ${uboot}/u-boot.bin stage/kernel.img
           echo "${configTxt}" > stage/config.txt
           
-          # 5. Copy to image
           for file in stage/*; do
             ${pkgs.mtools}/bin/mcopy -i $out/sd-image.img $file ::
           done
