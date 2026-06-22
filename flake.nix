@@ -6,34 +6,52 @@
   outputs = { self, nixpkgs }: {
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
-      pkgsFor = crossSystem: import nixpkgs {
-        inherit crossSystem;
-        system = "x86_64-linux";
-        config.allowUnsupportedSystem = true;
+      
+      # Helper function to generate an SD image derivation
+      mkSDImage = { uboot, configTxt }: pkgs.stdenv.mkDerivation {
+        name = "rpi-sd-image-${uboot.name}";
+        buildInputs = [ pkgs.mtools ];
+        buildCommand = ''
+          mkdir -p $out/boot
+          # Pull firmware from the official nixpkgs package
+          cp ${pkgs.raspberrypi-firmware}/bootcode.bin $out/boot/
+          cp ${pkgs.raspberrypi-firmware}/start.elf $out/boot/
+          cp ${pkgs.raspberrypi-firmware}/fixup.dat $out/boot/
+          # Copy our cross-compiled U-Boot
+          cp ${uboot}/u-boot.bin $out/boot/
+          # Write configuration
+          echo "${configTxt}" > $out/boot/config.txt
+          
+          # Create a reproducible tarball of the boot files
+          ${pkgs.gnutar}/bin/tar -C $out/boot -cf $out/sd-image.tar .
+        '';
       };
     in {
+      # Raw U-Boot binaries
       uboot-aarch64 = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
-        # Correct key for 32-bit ARM multiplatform
       uboot-armv7   = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
-  
-      # For older ARMv6 (Pi 1/Zero), use this target:
       uboot-armv6   = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
-      #uboot-armv6   = pkgs.pkgsCross.armv6l-hf-multiplatform.ubootRaspberryPi;
+
+      # SD Images
+      image-aarch64 = mkSDImage { 
+        uboot = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
+        configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=1";
+      };
+      image-armv7 = mkSDImage { 
+        uboot = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
+        configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=0";
+      };
+      image-armv6 = mkSDImage { 
+        uboot = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
+        configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=0";
+      };
     };
 
     devShells.x86_64-linux.default = let
       pkgs = import nixpkgs { system = "x86_64-linux"; };
     in pkgs.mkShell {
-      buildInputs = with pkgs; [
-        dtc          # Device Tree Compiler
-        mtools       # Tools for manipulating FAT images
-        parted       # Disk partitioning
-        gcc          # Host compiler
-        gnumake      # Build automation
-      ];
-      shellHook = ''
-        echo "Ready to build U-Boot and prepare SD card images."
-      '';
+      buildInputs = with pkgs; [ dtc mtools parted gcc gnumake ];
+      shellHook = "echo 'Ready to build U-Boot and SD images.'";
     };
   };
 }
