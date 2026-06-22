@@ -11,18 +11,20 @@
       mkSDImage = { uboot, configTxt }: pkgs.stdenv.mkDerivation {
         name = "rpi-sd-image-${uboot.name}";
         buildInputs = [ pkgs.mtools ];
-        buildCommand = ''
+         buildCommand = ''
           mkdir -p $out/boot
-          # Pull firmware from the official nixpkgs package
-          cp ${pkgs.raspberrypi-firmware}/bootcode.bin $out/boot/
-          cp ${pkgs.raspberrypi-firmware}/start.elf $out/boot/
-          cp ${pkgs.raspberrypi-firmware}/fixup.dat $out/boot/
+          # Use the correct package name: raspberrypifw
+          cp ${pkgs.raspberrypifw}/bootcode.bin $out/boot/
+          cp ${pkgs.raspberrypifw}/start.elf $out/boot/
+          cp ${pkgs.raspberrypifw}/fixup.dat $out/boot/
+          
           # Copy our cross-compiled U-Boot
           cp ${uboot}/u-boot.bin $out/boot/
+          
           # Write configuration
           echo "${configTxt}" > $out/boot/config.txt
           
-          # Create a reproducible tarball of the boot files
+          # Create a reproducible tarball
           ${pkgs.gnutar}/bin/tar -C $out/boot -cf $out/sd-image.tar .
         '';
       };
