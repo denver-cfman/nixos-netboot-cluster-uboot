@@ -25,7 +25,9 @@
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin stage/
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start.elf stage/
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup.dat stage/
-          cp ${uboot}/u-boot.bin stage/
+          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/*.dtb stage/
+          cp -r ${pkgs.raspberrypifw}/share/raspberrypi/boot/overlays stage/
+          cp ${uboot}/u-boot.bin stage/kernel.img
           echo "${configTxt}" > stage/config.txt
           
           # 5. Copy to image
@@ -51,7 +53,7 @@
       };
       image-armv6 = mkSDImage { 
         uboot = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
-        configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=0";
+        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0";
       };
     };
 
