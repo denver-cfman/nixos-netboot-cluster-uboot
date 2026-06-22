@@ -11,22 +11,22 @@
         name = "rpi-sd-image-${uboot.name}";
         nativeBuildInputs = [ pkgs.mtools pkgs.libfaketime ];
         buildCommand = ''
-          # 1. Create a 128MB raw file (the 'disk')
+          # 1. Create a 128MB raw file
           truncate -s 128M $out/sd-image.img
           
-          # 2. Format as FAT32 (partition 1)
-          # We use mformat to handle the filesystem creation inside the raw file
+          # 2. Format as FAT32
           ${pkgs.mtools}/bin/mformat -i $out/sd-image.img -F -v "BOOT" ::
           
-          # 3. Create a temporary folder to stage files
+          # 3. Stage files
           mkdir -p stage
+          # Ensure ALL paths use pkgs.raspberrypifw
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin stage/
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start.elf stage/
-          cp ${pkgs.raspberrypi-firmware}/share/raspberrypi/boot/fixup.dat stage/
+          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup.dat stage/
           cp ${uboot}/u-boot.bin stage/
           echo "${configTxt}" > stage/config.txt
           
-          # 4. Copy staged files into the FAT32 image
+          # 4. Copy to image
           for file in stage/*; do
             ${pkgs.mtools}/bin/mcopy -i $out/sd-image.img $file ::
           done
