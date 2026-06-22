@@ -22,6 +22,7 @@
           
           # 4. Stage files
           mkdir -p stage
+          ${pkgs.ubootTools}/bin/mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd stage/boot.scr
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin stage/
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start.elf stage/
           cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup.dat stage/
