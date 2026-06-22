@@ -44,14 +44,17 @@ mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
       image-aarch64 = mkSDImage { 
         uboot = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
         configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=1";
+        bootCmd = ./boot.cmd;
       };
       image-armv7 = mkSDImage { 
         uboot = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
         configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=0";
+        bootCmd = ./boot.cmd;
       };
       image-armv6 = mkSDImage { 
         uboot = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
         configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0";
+        bootCmd = ./boot.cmd;
       };
     };
 
