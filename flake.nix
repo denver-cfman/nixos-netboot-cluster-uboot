@@ -15,7 +15,7 @@
           mkdir -p $out
           
           # 2. Now you can write to the file inside $out
-          truncate -s 128M $out/sd-image.img
+          truncate -s 120M $out/sd-image.img
           
           # 3. Format as FAT32
           ${pkgs.mtools}/bin/mformat -i $out/sd-image.img -F -v "BOOT" ::
