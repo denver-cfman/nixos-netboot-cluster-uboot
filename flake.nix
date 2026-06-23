@@ -7,7 +7,6 @@
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
       
-      # Function to apply USB Ethernet support to ANY U-Boot package
       withUsbEthernet = uboot: uboot.overrideAttrs (old: {
         postConfigure = (old.postConfigure or "") + ''
           cat >> .config <<EOF
@@ -15,6 +14,11 @@
           CONFIG_USB_ETHER=y
           CONFIG_USB_ETHER_ASIX=y
           CONFIG_USB_ETHER_ASIX88179=y
+          # Required for Pi 4/5 USB/PCIe support
+          CONFIG_PCI=y
+          CONFIG_PCI_BCM2835=y
+          CONFIG_USB_XHCI_HCD=y
+          CONFIG_USB_XHCI_PCI=y
           EOF
           make olddefconfig
         '';
