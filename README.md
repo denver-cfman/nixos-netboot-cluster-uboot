@@ -32,10 +32,16 @@ nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=ma
 ``` sudo dd if=result/u-boot.bin of=/dev/sdX bs=4M conv=fsync status=progress ```
 ---
 
-## Build u-boot image for aarch64 (3, ,4 ,5, Zero2-W)
+## Build u-boot image for aarch64 (3, Zero2-W)
 ```bash
-nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#image-aarch64
+nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#image-armv8-rpi3
 ```
+
+## Build u-boot image for aarch64 (4 ,5)
+```bash
+nix build -v -L --refresh github:denver-cfman/nixos-netboot-cluster-uboot?ref=main#image-rpi4-5
+```
+
 ### once done, the writeable image will be in .result/u-boot.bin
 
 ``` sudo dd if=result/u-boot.bin of=/dev/sdX bs=4M conv=fsync status=progress ```

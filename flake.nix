@@ -1,5 +1,5 @@
 {
-  description = "Cross-compile U-Boot and prepare SD images";
+  description = "Cross-compile U-Boot and prepare SD images with USB Ethernet support";
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
@@ -7,61 +7,54 @@
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
       
-      mkSDImage = { uboot, configTxt }: pkgs.stdenv.mkDerivation {
+      # Driver configuration helper
+      withUsbEthernet = uboot: uboot.overrideAttrs (old: {
+        postConfigure = (old.postConfigure or "") + ''
+          cat >> .config <<EOF
+          CONFIG_USB_HOST_ETHER=y
+          CONFIG_USB_ETHER=y
+          CONFIG_USB_ETHER_ASIX=y
+          CONFIG_USB_ETHER_ASIX88179=y
+          CONFIG_USB_DWC2=y
+          CONFIG_USB_XHCI_HCD=y
+          CONFIG_USB_XHCI_PCI=y
+          EOF
+          make olddefconfig
+        '';
+      });
+
+      # Architecture specific U-Boot targets
+      ubootArmv6  = withUsbEthernet pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
+      ubootArmv7  = withUsbEthernet pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
+      ubootArmv8  = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi3_64bit; # Pi Zero 2 W / Pi 3
+      ubootPi4    = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit; # Pi 4 / 5
+
+      mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
         name = "rpi-sd-image-${uboot.name}";
-        nativeBuildInputs = [ pkgs.mtools pkgs.libfaketime ];
-         buildCommand = ''
-          # 1. Create the output directory first!
+        nativeBuildInputs = [ pkgs.mtools pkgs.ubootTools pkgs.libfaketime ];
+        BOOT_CMD = bootCmd;
+        buildCommand = ''
           mkdir -p $out
-          
-          # 2. Now you can write to the file inside $out
           truncate -s 120M $out/sd-image.img
-          
-          # 3. Format as FAT32
           ${pkgs.mtools}/bin/mformat -i $out/sd-image.img -F -v "BOOT" ::
-          
-          # 4. Stage files
           mkdir -p stage
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/bootcode.bin stage/
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/start.elf stage/
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/fixup.dat stage/
-          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/*.dtb stage/
+          ${pkgs.ubootTools}/bin/mkimage -A arm -O linux -T script -C none -n "Boot Script" -d $BOOT_CMD stage/boot.scr
+          cp ${pkgs.raspberrypifw}/share/raspberrypi/boot/{bootcode.bin,start.elf,fixup.dat,*.dtb} stage/
           cp -r ${pkgs.raspberrypifw}/share/raspberrypi/boot/overlays stage/
           cp ${uboot}/u-boot.bin stage/kernel.img
           echo "${configTxt}" > stage/config.txt
-          
-          # 5. Copy to image
+          set -x
           for file in stage/*; do
-            ${pkgs.mtools}/bin/mcopy -i $out/sd-image.img $file ::
+            ${pkgs.mtools}/bin/mcopy -i $out/sd-image.img "$file" ::
           done
         '';
       };
     in {
-      # Raw U-Boot binaries
-      uboot-aarch64 = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
-      uboot-armv7   = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
-      uboot-armv6   = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
-
-      # SD Images
-      image-aarch64 = mkSDImage { 
-        uboot = pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
-        configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=1";
-      };
-      image-armv7 = mkSDImage { 
-        uboot = pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
-        configTxt = "kernel=u-boot.bin\nenable_uart=1\narm_64bit=0";
-      };
-      image-armv6 = mkSDImage { 
-        uboot = pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
-        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0";
-      };
-    };
-
-    devShells.x86_64-linux.default = let
-      pkgs = import nixpkgs { system = "x86_64-linux"; };
-    in pkgs.mkShell {
-      buildInputs = with pkgs; [ dtc mtools parted gcc gnumake ];
-      shellHook = "echo 'Ready to build U-Boot and SD images.'";
+      # Export SD Images
+      image-armv6      = mkSDImage { uboot = ubootArmv6; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
+      image-armv7      = mkSDImage { uboot = ubootArmv7; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
+      image-armv8-rpi3 = mkSDImage { uboot = ubootArmv8; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
+      image-rpi4-5     = mkSDImage { uboot = ubootPi4;   configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
     };
   };
 }
