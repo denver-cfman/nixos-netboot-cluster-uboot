@@ -51,10 +51,10 @@
       };
     in {
       # Export SD Images
-      image-armv6     = mkSDImage { uboot = ubootArmv6; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
-      image-armv7     = mkSDImage { uboot = ubootArmv7; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
+      image-armv6      = mkSDImage { uboot = ubootArmv6; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
+      image-armv7      = mkSDImage { uboot = ubootArmv7; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
       image-armv8-rpi3 = mkSDImage { uboot = ubootArmv8; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
-      image-rpi4-5     = mkSDImage { uboot = ubootPi4;    configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
+      image-rpi4-5     = mkSDImage { uboot = ubootPi4;   configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
     };
   };
 }
