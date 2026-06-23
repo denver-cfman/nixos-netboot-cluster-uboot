@@ -7,17 +7,26 @@
     packages.x86_64-linux = let
       pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnsupportedSystem = true; };
       
-      # Driver configuration helper
       withUsbEthernet = uboot: uboot.overrideAttrs (old: {
         postConfigure = (old.postConfigure or "") + ''
           cat >> .config <<EOF
+          # --- Host Side (For ASIX/Others) ---
           CONFIG_USB_HOST_ETHER=y
           CONFIG_USB_ETHER=y
           CONFIG_USB_ETHER_ASIX=y
           CONFIG_USB_ETHER_ASIX88179=y
-          CONFIG_USB_DWC2=y
-          CONFIG_USB_XHCI_HCD=y
-          CONFIG_USB_XHCI_PCI=y
+          
+          # --- Gadget Side (For RNDIS/CDC-ECM) ---
+          CONFIG_USB_GADGET=y
+          CONFIG_USB_GADGET_DOWNLOAD=y
+          CONFIG_USB_FUNCTION_MASS_STORAGE=y
+          CONFIG_USB_ETHER_GADGET=y
+          CONFIG_USBNET_DEV_ADDR="de:ad:be:ef:00:01"
+          CONFIG_USBNET_HOST_ADDR="de:ad:be:ef:00:00"
+          
+          # Protocol choice for gadget
+          CONFIG_USB_ETH_RNDIS=y
+          #CONFIG_USB_ETH_CDC=y
           EOF
           make olddefconfig
         '';
