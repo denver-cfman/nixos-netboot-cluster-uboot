@@ -10,8 +10,15 @@
       # Function to apply USB Ethernet support to ANY U-Boot package
       withUsbEthernet = uboot: uboot.overrideAttrs (old: {
         postConfigure = (old.postConfigure or "") + ''
+          # Enable the core USB Ethernet framework
+          echo "CONFIG_USB_HOST_ETHER=y" >> .config
+          echo "CONFIG_USB_ETHER=y" >> .config
+          
+          # Enable your specific drivers
           echo "CONFIG_USB_ETHER_ASIX=y" >> .config
           echo "CONFIG_USB_ETHER_ASIX88179=y" >> .config
+          
+          # Force the config to resolve dependencies
           make oldconfig
         '';
       });
