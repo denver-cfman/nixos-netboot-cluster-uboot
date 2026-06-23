@@ -44,24 +44,24 @@
       };
     in {
       # Custom U-Boot packages
-      uboot-aarch64 = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
-      uboot-armv7   = withUsbEthernet pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
-      uboot-armv6   = withUsbEthernet pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
+      #uboot-aarch64 = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
+      #uboot-armv7   = withUsbEthernet pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
+      #uboot-armv6   = withUsbEthernet pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
 
       # SD Images using the custom U-Boot
       image-aarch64 = mkSDImage { 
         uboot = self.packages.x86_64-linux.uboot-aarch64;
-        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1";
+        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host";
         bootCmd = ./boot.cmd;
       };
       image-armv7 = mkSDImage { 
         uboot = self.packages.x86_64-linux.uboot-armv7;
-        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0";
+        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host";
         bootCmd = ./boot.cmd;
       };
       image-armv6 = mkSDImage { 
         uboot = self.packages.x86_64-linux.uboot-armv6;
-        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0";
+        configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host";
         bootCmd = ./boot.cmd;
       };
     };
