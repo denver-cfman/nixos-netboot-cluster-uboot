@@ -15,10 +15,11 @@
           CONFIG_USB_ETHER=y
           CONFIG_USB_ETHER_ASIX=y
           CONFIG_USB_ETHER_ASIX88179=y
-          
-          # --- Gadget Side (For RNDIS/CDC-ECM) ---
           CONFIG_USB_GADGET=y
+          CONFIG_USB_GADGET_DWC2_OTG=y
           CONFIG_USB_GADGET_DOWNLOAD=y
+          CONFIG_USB_ETHER_GADGET=y
+          CONFIG_USB_ETH_RNDIS=y
           CONFIG_USB_FUNCTION_MASS_STORAGE=y
           CONFIG_USB_ETHER_GADGET=y
           CONFIG_USBNET_DEV_ADDR="de:ad:be:ef:00:01"
