@@ -25,7 +25,8 @@
         buildInputs = [ customIpxe ];
         buildCommand = ''
           mkdir -p $out
-          cp ${customIpxe}/bin/ipxe.iso $out/ipxe.iso
+          cp ${customIpxe}/ipxe.iso $out/ipxe.iso
+          cp ${customIpxe}/undionly.kpxe $out/undionly.kpxe
         '';
       };
 
