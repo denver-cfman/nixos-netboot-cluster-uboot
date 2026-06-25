@@ -15,7 +15,7 @@
       embedScript = pkgs.writeText "boot.ipxe" ''
         #!ipxe
         dhcp
-        chain http://10.0.85.75/netboot.xyz.efi
+        chain http://10.0.83.20/netboot.xyz.efi
       '';
 
       customIpxe = pkgs.ipxe.override { embedScript = embedScript; };
