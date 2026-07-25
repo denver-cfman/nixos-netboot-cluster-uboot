@@ -12,11 +12,34 @@ let
       CONFIG_USB_ETHER_RTL8152=y
       CONFIG_USB_ETHER_SMSC95XX=y
       CONFIG_USB_GADGET=y
+      #CONFIG_USB_GADGET_GENERIC=y
+      #CONFIG_CI_UDC=y
+      CONFIG_DM_ETH=y
       CONFIG_USB_GADGET_DWC2_OTG=y
+      CONFIG_USB_DWC2_GLOBAL_FIFO_SIZE=y
       CONFIG_USB_GADGET_DOWNLOAD=y
       CONFIG_USB_ETHER_GADGET=y
       CONFIG_USB_ETH_RNDIS=y
       CONFIG_USB_ETH_CDC=y
+      CONFIG_USB_FUNCTION_MASS_STORAGE=y
+      CONFIG_USBNET_DEV_ADDR="de:ad:be:ef:00:01"
+      CONFIG_USBNET_HOST_ADDR="de:ad:be:ef:00:00"
+      EOF
+      make olddefconfig
+    '';
+  });
+
+  viaClusterHat = uboot: uboot.overrideAttrs (old: {
+    postConfigure = (old.postConfigure or "") + ''
+      cat >> .config <<EOF
+      CONFIG_USB_GADGET=y
+      CONFIG_USB_GADGET_DWC2_OTG=y
+      CONFIG_USB_DWC2_GLOBAL_FIFO_SIZE=y
+      CONFIG_USB_GADGET_DOWNLOAD=y
+      CONFIG_USB_ETHER_GADGET=y
+      CONFIG_USB_ETH_RNDIS=y
+      CONFIG_USB_ETH_CDC=y
+      CONFIG_DM_ETH=y
       CONFIG_USB_FUNCTION_MASS_STORAGE=y
       CONFIG_USBNET_DEV_ADDR="de:ad:be:ef:00:01"
       CONFIG_USBNET_HOST_ADDR="de:ad:be:ef:00:00"
@@ -30,6 +53,10 @@ let
   ubootArmv7 = withUsbEthernet pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
   ubootArmv8 = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi3_64bit;
   ubootPi4   = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
+
+  armv6ViaClusterHat = viaClusterHat pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
+  armv7ViaClusterHat = viaClusterHat pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
+  armv8ViaClusterHat = viaClusterHat pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi3_64bit;
 
   mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
     name = "rpi-sd-image-${uboot.name}";
@@ -51,8 +78,12 @@ let
     '';
   };
 in {
-  image-armv6      = mkSDImage { uboot = ubootArmv6; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
-  image-armv7      = mkSDImage { uboot = ubootArmv7; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
-  image-armv8-rpi3 = mkSDImage { uboot = ubootArmv8; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
-  image-rpi4-5     = mkSDImage { uboot = ubootPi4;   configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=host"; bootCmd = ./boot.cmd; };
+  image-armv6      = mkSDImage { uboot = ubootArmv6; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=peripheral"; bootCmd = ./boot.cmd; };
+  image-armv7      = mkSDImage { uboot = ubootArmv7; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=peripheral"; bootCmd = ./boot.cmd; };
+  image-armv8-rpi3 = mkSDImage { uboot = ubootArmv8; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=peripheral"; bootCmd = ./boot.cmd; };
+  image-rpi4-5     = mkSDImage { uboot = ubootPi4;   configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=peripheral"; bootCmd = ./boot.cmd; };
+
+  image-armv6-ch      = mkSDImage { uboot = armv6ViaClusterHat; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=peripheral"; bootCmd = ./boot-ch.cmd; };
+  image-armv7-ch      = mkSDImage { uboot = armv7ViaClusterHat; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=0\ndtoverlay=dwc2,dr_mode=peripheral"; bootCmd = ./boot-ch.cmd; };
+  image-armv8-rpi3-ch = mkSDImage { uboot = armv8ViaClusterHat; configTxt = "kernel=kernel.img\nenable_uart=1\narm_64bit=1\ndtoverlay=dwc2,dr_mode=peripheral"; bootCmd = ./boot-ch.cmd; };
 }
