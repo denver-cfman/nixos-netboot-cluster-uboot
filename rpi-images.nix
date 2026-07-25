@@ -27,6 +27,25 @@ let
       EOF
       make olddefconfig
     '';
+
+  viaClusterHat = uboot: uboot.overrideAttrs (old: {
+    postConfigure = (old.postConfigure or "") + ''
+      cat >> .config <<EOF
+      CONFIG_USB_GADGET=y
+      CONFIG_USB_GADGET_DWC2_OTG=y
+      CONFIG_USB_DWC2_GLOBAL_FIFO_SIZE=y
+      CONFIG_USB_GADGET_DOWNLOAD=y
+      CONFIG_USB_ETHER_GADGET=y
+      CONFIG_USB_ETH_RNDIS=y
+      CONFIG_USB_ETH_CDC=y
+      CONFIG_DM_ETH=y
+      CONFIG_USB_FUNCTION_MASS_STORAGE=y
+      CONFIG_USBNET_DEV_ADDR="de:ad:be:ef:00:01"
+      CONFIG_USBNET_HOST_ADDR="de:ad:be:ef:00:00"
+      EOF
+      make olddefconfig
+    '';
+
   });
 
   # Define cross-compiled U-Boot versions [cite: 6, 7]
@@ -34,6 +53,10 @@ let
   ubootArmv7 = withUsbEthernet pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
   ubootArmv8 = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi3_64bit;
   ubootPi4   = withUsbEthernet pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi4_64bit;
+
+  armv6ViaClusterHat = viaClusterHat pkgs.pkgsCross.raspberryPi.ubootRaspberryPi;
+  armv7ViaClusterHat = viaClusterHat pkgs.pkgsCross.armv7l-hf-multiplatform.ubootRaspberryPi3_32bit;
+  armv8ViaClusterHat = viaClusterHat pkgs.pkgsCross.aarch64-multiplatform.ubootRaspberryPi3_64bit;
 
   mkSDImage = { uboot, configTxt, bootCmd }: pkgs.stdenv.mkDerivation {
     name = "rpi-sd-image-${uboot.name}";
