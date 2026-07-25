@@ -27,6 +27,7 @@ let
       EOF
       make olddefconfig
     '';
+  });
 
   viaClusterHat = uboot: uboot.overrideAttrs (old: {
     postConfigure = (old.postConfigure or "") + ''
@@ -45,7 +46,6 @@ let
       EOF
       make olddefconfig
     '';
-
   });
 
   # Define cross-compiled U-Boot versions [cite: 6, 7]
