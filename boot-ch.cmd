@@ -5,6 +5,11 @@ setenv stderr serial,vidconsole
 setenv stdin serial,usbkbd
 echo "we need to wait 20 sec for the auto neg to work on the network switch"
 sleep 20
+setenv ethact usb_ether
+setenv ipaddr 10.0.85.11
+setenv serverip 10.0.85.1
+setenv usbnet_devaddr de:ad:be:ef:00:01
+setenv usbnet_hostaddr de:ad:be:ef:00:00
 usb start
 usb tree
 net list
